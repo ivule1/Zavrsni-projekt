@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="hr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>WS test - E-Glasanje admin nadzor</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 720px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+      }
+      h1 {
+        font-size: 1.3rem;
+      }
+      label {
+        display: block;
+        margin-top: 1rem;
+        font-weight: 600;
+      }
+      input {
+        width: 100%;
+        padding: 0.5rem;
+        font-family: monospace;
+        box-sizing: border-box;
+      }
+      button {
+        margin-top: 1rem;
+        padding: 0.6rem 1.2rem;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      #status {
+        margin-top: 1rem;
+        font-weight: 600;
+      }
+      #status.connected {
+        color: #1e7a3d;
+      }
+      #status.disconnected {
+        color: #b3261e;
+      }
+      #log {
+        margin-top: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        padding: 0.75rem;
+        height: 300px;
+        overflow-y: auto;
+        font-family: monospace;
+        font-size: 0.85rem;
+        background: #fafafa;
+      }
+      .log-line {
+        margin-bottom: 0.4rem;
+        white-space: pre-wrap;
+      }
+      .log-line.event {
+        color: #1d4e89;
+      }
+      .log-line.error {
+        color: #b3261e;
+      }
+      .log-line.info {
+        color: #555;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>WS test alat - E-Glasanje admin nadzor (Faza 8)</h1>
+    <p>
+      Ovo NIJE dio prave aplikacije - samo pomoćna stranica da vizualno vidimo da
+      <code>/ws/admin</code> radi, dok pravi admin dashboard ne postoji (Faza 9).
+    </p>
+
+    <label for="wsUrl">WebSocket adresa</label>
+    <input id="wsUrl" value="ws://127.0.0.1:8000/ws/admin" />
+
+    <label for="token">Admin JWT (Access token iz Swaggera, bez "Bearer ")</label>
+    <input id="token" placeholder="eyJhbGciOiJIUzI1NiIs..." />
+
+    <button id="connectBtn">Spoji se</button>
+    <button id="pingBtn" disabled>Pošalji ping</button>
+    <button id="disconnectBtn" disabled>Prekini vezu</button>
+
+    <div id="status" class="disconnected">Nije spojeno</div>
+
+    <div id="log"></div>
+
+    <script>
+      let ws = null;
+
+      const statusEl = document.getElementById("status");
+      const logEl = document.getElementById("log");
+      const connectBtn = document.getElementById("connectBtn");
+      const pingBtn = document.getElementById("pingBtn");
+      const disconnectBtn = document.getElementById("disconnectBtn");
+
+      function log(message, kind) {
+        const line = document.createElement("div");
+        line.className = "log-line" + (kind ? " " + kind : "");
+        const time = new Date().toLocaleTimeString("hr-HR");
+        line.textContent = `[${time}] ${message}`;
+        logEl.appendChild(line);
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      function setStatus(connected) {
+        statusEl.textContent = connected ? "Spojeno" : "Nije spojeno";
+        statusEl.className = connected ? "connected" : "disconnected";
+        connectBtn.disabled = connected;
+        pingBtn.disabled = !connected;
+        disconnectBtn.disabled = !connected;
+      }
+
+      connectBtn.addEventListener("click", () => {
+        const url = document.getElementById("wsUrl").value.trim();
+        const token = document.getElementById("token").value.trim();
+        if (!token) {
+          log("Upiši admin JWT prije spajanja.", "error");
+          return;
+        }
+
+        log(`Spajam se na ${url} ...`, "info");
+        ws = new WebSocket(url);
+
+        ws.onopen = () => {
+          log("Veza otvorena, šaljem token (prva poruka, poglavlje 34.3)...", "info");
+          ws.send(JSON.stringify({ token }));
+        };
+
+        ws.onmessage = (event) => {
+          if (event.data === "pong") {
+            log("primio: pong (heartbeat OK)", "info");
+            return;
+          }
+          try {
+            const parsed = JSON.parse(event.data);
+            if (parsed.type === "connected") {
+              setStatus(true);
+              log("Autentikacija uspjela - server potvrdio spajanje.", "info");
+            } else {
+              log("EVENT: " + JSON.stringify(parsed), "event");
+            }
+          } catch {
+            log("primio (nije JSON): " + event.data, "info");
+          }
+        };
+
+        ws.onerror = () => {
+          log("Greška na WebSocket vezi.", "error");
+        };
+
+        ws.onclose = (event) => {
+          setStatus(false);
+          log(`Veza zatvorena (kod ${event.code}${event.reason ? ", razlog: " + event.reason : ""}).`, "error");
+        };
+      });
+
+      pingBtn.addEventListener("click", () => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send("ping");
+          log("poslano: ping", "info");
+        }
+      });
+
+      disconnectBtn.addEventListener("click", () => {
+        if (ws) {
+          ws.close();
+        }
+      });
+    </script>
+  </body>
+</html>

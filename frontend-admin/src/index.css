@@ -1,0 +1,834 @@
+/* FAZA 9 (dopuna) #19 - dizajn sustav usklađen s glasačkim terminalom
+   (frontend-terminal/src/index.css): ista neutralna greige paleta,
+   tipografija (Source Sans 3 + PT Serif za naslove) i vodeni žig, da admin
+   konzola djeluje kao dio iste službene aplikacije, ne kao odvojen alat.
+   Vrijednosti ispod su namjerno preuzete 1:1 od kiosk-* varijabli. */
+:root {
+  --admin-bg-start: #e7e7e4;
+  --admin-bg-end: #d5d5d1;
+  --admin-bg: #dededa;
+  --admin-card-bg: #f5f5f3;
+  --admin-border: #d2d2ce;
+
+  --admin-primary: #33475a;
+  --admin-primary-dark: #24333f;
+
+  --admin-text: #2a2a28;
+  --admin-muted: #6b6b66;
+  --admin-header-text: #83837e;
+
+  --admin-success: #3a6146;
+  --admin-success-bg: #e9f0e7;
+  --admin-error: #93362d;
+  --admin-error-bg: #f3e6e3;
+  --admin-warning-bg: #f2ead9;
+  --admin-warning-text: #7a5a1e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+}
+
+.admin-shell {
+  min-height: 100vh;
+  padding: 2rem;
+  background: linear-gradient(160deg, var(--admin-bg-start) 0%, var(--admin-bg-end) 100%);
+}
+
+.admin-login-wrap {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  background: linear-gradient(160deg, var(--admin-bg-start) 0%, var(--admin-bg-end) 100%);
+}
+
+.admin-login-card {
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 0.9rem;
+  box-shadow: 0 14px 34px rgba(43, 42, 37, 0.1);
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 380px;
+}
+
+.admin-card {
+  background: var(--admin-card-bg);
+  border: 1px solid var(--admin-border);
+  border-radius: 0.9rem;
+  box-shadow: 0 14px 34px rgba(43, 42, 37, 0.1);
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Rasklopive kartice (FAZA 9 dopuna, zadatak #20) - "Glasovi po biralistu"
+   (129 redaka) i "Glasovi po uredjaju" su najduzi prikazi na Nadzor tabu, pa
+   zauzmu skoro cijeli ekran i guraju vazniju statistiku (izlaznost/tally)
+   duboko dolje - skupljeno po defaultu (bez open atributa u JSX-u) rjesava
+   to bez gubitka podataka, samo klik na naslov ih otvori kad zatrebaju. */
+.collapsible-card > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  cursor: pointer;
+  list-style: none;
+  flex-wrap: wrap;
+}
+
+.collapsible-card > summary::-webkit-details-marker {
+  display: none;
+}
+
+.collapsible-card > summary::after {
+  content: "▸";
+  color: var(--admin-muted);
+  flex: none;
+  margin-left: 0.5rem;
+  transition: transform 0.15s ease;
+}
+
+.collapsible-card[open] > summary::after {
+  transform: rotate(90deg);
+}
+
+.collapsible-card-body {
+  margin-top: 1rem;
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+/* Kao kiosk-header-election - jedini serif element osim vodenog žiga,
+   suzdržana upotreba (ne na svakom naslovu kartice). */
+.admin-title {
+  font-family: "PT Serif", Georgia, serif;
+  font-weight: 400;
+  font-size: 1.6rem;
+  margin: 0;
+  color: var(--admin-header-text);
+}
+
+.admin-btn {
+  background-color: var(--admin-primary);
+  border-color: var(--admin-primary);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 0.6rem;
+}
+
+.admin-btn:hover:not(:disabled) {
+  background-color: var(--admin-primary-dark);
+  border-color: var(--admin-primary-dark);
+}
+
+/* Formu (unos/dugmad) uskladiti s kiosk-inputima - zaobljenije, s istim
+   fokusnim prstenom u boji admin-primary umjesto zadanog Bootstrap plavog. */
+.form-control {
+  border-radius: 0.5rem;
+  border-color: var(--admin-border);
+}
+
+.form-control:focus {
+  border-color: var(--admin-primary);
+  box-shadow: 0 0 0 0.2rem rgba(51, 71, 90, 0.15);
+}
+
+.btn {
+  border-radius: 0.5rem;
+}
+
+.ws-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+}
+
+.ws-indicator.connected {
+  background: var(--admin-success-bg);
+  color: var(--admin-success);
+}
+
+.ws-indicator.disconnected {
+  background: var(--admin-error-bg);
+  color: var(--admin-error);
+}
+
+.ws-dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.status-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.25rem 0.6rem;
+  border-radius: 0.4rem;
+  text-transform: uppercase;
+}
+
+.status-badge.status-draft {
+  background: #e5e5e1;
+  color: var(--admin-muted);
+}
+
+.status-badge.status-open {
+  background: var(--admin-success-bg);
+  color: var(--admin-success);
+}
+
+.status-badge.status-closed {
+  background: #e5e5e1;
+  color: var(--admin-text);
+}
+
+.vote-count-table td,
+.vote-count-table th {
+  vertical-align: middle;
+}
+
+.vote-count-cell {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.count-flash {
+  animation: countFlash 1s ease;
+}
+
+@keyframes countFlash {
+  0% {
+    background-color: var(--admin-warning-bg);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.integrity-ok {
+  color: var(--admin-success);
+  font-weight: 600;
+}
+
+.integrity-bad {
+  color: var(--admin-error);
+  font-weight: 700;
+}
+
+.tally-warning {
+  background: var(--admin-warning-bg);
+  color: var(--admin-warning-text);
+  border-radius: 0.5rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.9rem;
+}
+
+/* SecurityEventsPanel (FAZA 9 dopuna) - popis audit-log zapisa (poglavlje 16/22). */
+.audit-log-list {
+  max-height: 40vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.audit-log-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.4rem 0.6rem;
+  border-radius: 0.4rem;
+  font-size: 0.85rem;
+  flex-wrap: wrap;
+}
+
+.audit-log-row:nth-child(odd) {
+  background: var(--admin-bg);
+}
+
+.audit-log-row--suspicious {
+  background: var(--admin-warning-bg);
+  color: var(--admin-warning-text);
+}
+
+.audit-log-time {
+  font-variant-numeric: tabular-nums;
+  color: var(--admin-muted);
+  white-space: nowrap;
+  flex: none;
+}
+
+.audit-log-row--suspicious .audit-log-time {
+  color: var(--admin-warning-text);
+}
+
+.audit-log-type {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.audit-log-context {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  color: var(--admin-muted);
+}
+
+.audit-log-row--suspicious .audit-log-context {
+  color: var(--admin-warning-text);
+}
+
+.audit-log-meta {
+  font-family: monospace;
+  font-size: 0.78rem;
+}
+
+.admin-tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--admin-border);
+}
+
+.admin-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 0.6rem 0.9rem;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: var(--admin-muted);
+  cursor: pointer;
+}
+
+.admin-tab:hover {
+  color: var(--admin-text);
+}
+
+.admin-tab.active {
+  color: var(--admin-primary);
+  border-bottom-color: var(--admin-primary);
+}
+
+.election-row {
+  border: 1px solid var(--admin-border);
+  border-radius: 0.6rem;
+  margin-bottom: 0.6rem;
+  overflow: hidden;
+}
+
+.election-row-header {
+  width: 100%;
+  background: var(--admin-card-bg);
+  border: none;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  text-align: left;
+}
+
+.election-row-header:hover {
+  background: var(--admin-bg);
+}
+
+.election-row-body {
+  padding: 1rem;
+  border-top: 1px solid var(--admin-border);
+}
+
+.station-table-wrap {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* --- FAZA 9 (dopuna) #19: vodeni žig (grb + "Republika Hrvatska"), isti kao
+   na glasačkom terminalu - vidi frontend-terminal/src/index.css
+   (.kiosk-watermark*) i AdminWatermark.jsx. --------------------------------- */
+
+.admin-watermark {
+  position: fixed;
+  top: 1.5rem;
+  left: 1.75rem;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.admin-watermark-emblem {
+  width: 34px;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.admin-watermark-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.admin-watermark-line {
+  font-family: "PT Serif", Georgia, serif;
+  font-size: 1.2rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  color: var(--admin-header-text);
+}
+
+/* Inline varijanta - dio admin-headera na Dashboardu, ne fiksna preko cijelog
+   ekrana (izbjegava preklapanje s naslovom u istom kutu). */
+.admin-watermark--inline {
+  position: static;
+  top: auto;
+  left: auto;
+  z-index: auto;
+  pointer-events: auto;
+}
+
+.admin-watermark--inline .admin-watermark-emblem {
+  width: 24px;
+}
+
+.admin-watermark--inline .admin-watermark-line {
+  font-size: 0.85rem;
+}
+
+/* Razdvaja grb/"Republika Hrvatska" oznaku od naslova "Admin konzola" -
+   inace izgledaju kao jedan spojen natpis jer su odmah jedno pored drugog. */
+.admin-header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 1.1rem;
+}
+
+.admin-header-title-group .admin-title {
+  padding-left: 1.1rem;
+  border-left: 1px solid var(--admin-border, #d8d4c8);
+}
+
+/* --- FAZA 9 (dopuna) #18: grafovi/statistika na Nadzor tabu --------------- */
+
+.donut-chart-wrap {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.donut-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.85rem;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.donut-legend li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.donut-swatch {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 0.2rem;
+  flex: none;
+}
+
+.donut-legend-label {
+  flex: 1 1 auto;
+}
+
+.donut-legend-value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.bar-chart {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.bar-chart-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.bar-chart-label {
+  flex: 0 0 auto;
+  min-width: 12rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.bar-chart-track {
+  flex: 1 1 auto;
+  background: var(--admin-bg);
+  border-radius: 999px;
+  overflow: hidden;
+  height: 0.85rem;
+}
+
+.bar-chart-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.2s ease;
+}
+
+.bar-chart-value {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  min-width: 3.5rem;
+  text-align: right;
+}
+
+/* orientation="vertical" (FAZA 9 dopuna, zadatak #21) - stupci jedan pored
+   drugog s razmakom, umjesto vodoravnih traka jedne ispod druge koje su se
+   vizualno spajale s BreakdownList popisom odmah ispod njih. */
+.bar-chart--vertical {
+  display: flex;
+  /* .bar-chart (osnovna klasa, uvijek prisutna uz ovu) postavlja
+     flex-direction: column za vodoravnu (staru) varijantu - mora se
+     eksplicitno vratiti na row ovdje, inace stupci ostaju stavljeni jedan
+     ISPOD drugog (nasljedjuju column jer ova klasa dosad nije dirala to
+     svojstvo), pa cijeli graf postane niz puta visi nego sto treba. */
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.9rem;
+  margin-bottom: 1.25rem;
+  padding: 0 0.25rem;
+}
+
+.bar-chart--vertical.bar-chart--scrollable {
+  justify-content: flex-start;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.bar-chart-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1 1 0;
+  min-width: 3rem;
+}
+
+.bar-chart--scrollable .bar-chart-col {
+  flex: none;
+  width: 4.75rem;
+}
+
+.bar-chart-col-value {
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 0.35rem;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.bar-chart-col-track {
+  width: 100%;
+  max-width: 2.6rem;
+  background: var(--admin-bg);
+  border-radius: 0.4rem 0.4rem 0.15rem 0.15rem;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+}
+
+.bar-chart-col-fill {
+  width: 100%;
+  border-radius: 0.4rem 0.4rem 0 0;
+  transition: height 0.2s ease;
+  min-height: 2px;
+}
+
+.bar-chart-col-label {
+  margin-top: 0.45rem;
+  font-size: 0.68rem;
+  line-height: 1.15;
+  color: var(--admin-muted);
+  text-align: center;
+  width: 100%;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* StackedBarChart (FAZA 9 dopuna, zadatak #22) - "Rezultati po NUTS2
+   regiji/zupaniji" postaju slozeni stupicasti grafovi: visina stupca =
+   ukupna izlaznost te skupine, boje segmenata unutar stupca = isti
+   kandidati/boje kao u "Rezultati po kandidatu" (vidi candidateColorById u
+   TallyPanelu) - jedan graf umjesto dva odvojena pitanja "koliko" i "tko". */
+.stacked-bar-chart-scroll.is-scrollable {
+  overflow-x: auto;
+  padding-bottom: 0.35rem;
+}
+
+.stacked-bar-chart-plot {
+  position: relative;
+  margin-left: 2.4rem;
+  margin-top: 3rem;
+  margin-bottom: 0.5rem;
+}
+
+.stacked-bar-chart-gridline {
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 1px dashed var(--admin-border);
+}
+
+.stacked-bar-chart-tick-label {
+  position: absolute;
+  left: -2.4rem;
+  width: 2rem;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  color: var(--admin-muted);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.stacked-bar-chart-tracks {
+  display: flex;
+  align-items: flex-end;
+  height: 100%;
+  gap: 0.9rem;
+}
+
+.stacked-bar-chart-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1 1 0;
+  min-width: 2.6rem;
+  height: 100%;
+}
+
+.stacked-bar-chart-col.is-scrollable {
+  flex: none;
+  width: 3.1rem;
+}
+
+.stacked-bar-chart-col-track {
+  position: relative;
+  width: 100%;
+  max-width: 2.6rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column-reverse;
+  border-radius: 0.35rem 0.35rem 0.1rem 0.1rem;
+  overflow: visible;
+  background: var(--admin-bg);
+}
+
+.stacked-bar-chart-segment {
+  width: 100%;
+}
+
+.stacked-bar-chart-col-value {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -100%);
+  margin-bottom: 0.2rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+.stacked-bar-chart-labels {
+  display: flex;
+  gap: 0.9rem;
+  margin-left: 2.4rem;
+}
+
+.stacked-bar-chart-col-label {
+  flex: 1 1 0;
+  min-width: 2.6rem;
+  font-size: 0.68rem;
+  line-height: 1.15;
+  color: var(--admin-muted);
+  text-align: center;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.stacked-bar-chart-col-label.is-scrollable {
+  flex: none;
+  width: 3.1rem;
+}
+
+.chart-legend-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-bottom: 0.75rem;
+  font-size: 0.82rem;
+}
+
+.chart-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.chart-legend-swatch {
+  width: 0.65rem;
+  height: 0.65rem;
+  border-radius: 0.2rem;
+  flex: none;
+}
+
+.breakdown-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.breakdown-row {
+  border: 1px solid var(--admin-border);
+  border-radius: 0.5rem;
+  padding: 0.1rem 0.75rem;
+}
+
+.breakdown-row summary {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0;
+  cursor: pointer;
+  list-style: none;
+}
+
+.breakdown-row summary::-webkit-details-marker {
+  display: none;
+}
+
+.breakdown-row summary::before {
+  content: "▸";
+  color: var(--admin-muted);
+  flex: none;
+  transition: transform 0.15s ease;
+}
+
+.breakdown-row[open] summary::before {
+  transform: rotate(90deg);
+}
+
+.breakdown-label {
+  flex: 0 0 auto;
+  min-width: 12rem;
+  font-weight: 600;
+}
+
+.breakdown-bar-wrap {
+  flex: 1 1 auto;
+  background: var(--admin-bg);
+  border-radius: 999px;
+  overflow: hidden;
+  height: 0.6rem;
+}
+
+.breakdown-bar {
+  display: block;
+  height: 100%;
+  background: var(--admin-primary);
+  border-radius: 999px;
+}
+
+.breakdown-total {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+.breakdown-sublabel {
+  flex: none;
+  font-size: 0.8rem;
+  color: var(--admin-muted);
+  white-space: nowrap;
+}
+
+/* showDetails=false varijanta (izlaznost uzivo, FAZA 9 dopuna) - isti redak
+   kao rasklopivi <details>, ali bez strelice/kursora jer nema sto rasklopiti. */
+.breakdown-row--plain {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.75rem;
+}
+
+.breakdown-detail {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0.75rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.breakdown-detail li {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+/* Kandidat s najvise glasova UNUTAR te grupe (biraliste/zupanija/regija) -
+   ne mora biti isti kao ukupni pobjednik izbora, pa se boldira po grupi
+   posebno (BreakdownList racuna maxCount za svaku grupu zasebno). */
+.breakdown-detail-winner {
+  font-weight: 700;
+}

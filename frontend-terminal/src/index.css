@@ -1,0 +1,288 @@
+:root {
+  /* Neutralna siva paleta (manje bež/toplo nego prije) - cilj je da izgleda
+     kao službena, profesionalna stranica. Pozadina i kartica su namjerno
+     bliske nijanse iste obitelji boja (kartica tek malo svjetlija) da se
+     kartica lagano izdvoji, a ne da "probija" pozadinu jakim kontrastom. */
+  --kiosk-bg-start: #e7e7e4;
+  --kiosk-bg-end: #d5d5d1;
+  --kiosk-card-bg: #f5f5f3;
+  --kiosk-border: #d2d2ce;
+
+  --kiosk-primary: #33475a;
+  --kiosk-primary-dark: #24333f;
+
+  --kiosk-text: #2a2a28;
+  --kiosk-muted: #6b6b66;
+  --kiosk-header-text: #83837e;
+
+  --kiosk-error: #93362d;
+  --kiosk-error-bg: #f3e6e3;
+  --kiosk-success: #3a6146;
+  --kiosk-success-bg: #e9f0e7;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: "Source Sans 3", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color: var(--kiosk-text);
+}
+
+.kiosk-background {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, var(--kiosk-bg-start) 0%, var(--kiosk-bg-end) 100%);
+  padding: 2rem;
+}
+
+/* Poluprozirni "izljev" boje preko CIJELOG EKRANA nakon uspjeha/greške, ALI
+   ispod kartice (z-index niži od .kiosk-shell) - boji samo pozadinu OKO
+   kartice, kartica ostaje u svojoj normalnoj boji. Boja se MIJENJA (fade),
+   element je uvijek u DOM-u, nikad se ne montira/demontira naglo - to je
+   ono što tranziciju čini glatkom u oba smjera. */
+.kiosk-tint {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background-color: transparent;
+  transition: background-color 1.4s ease;
+}
+
+.kiosk-tint--success {
+  background-color: rgba(58, 97, 70, 0.16);
+}
+
+.kiosk-tint--error {
+  background-color: rgba(147, 54, 45, 0.14);
+}
+
+/* Zajednički omotač za zaglavlje + karticu - drzi ih poravnate na istu
+   sirinu tako da zaglavlje djeluje kao dio iste službene stranice, a ne
+   kao odvojen element. position+z-index ovdje su namjerni: kartica mora
+   ostati IZNAD .kiosk-tint sloja (vidi niže) da je taj sloj boji samo
+   pozadinu iza kartice, a ne i samu karticu. */
+.kiosk-shell {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 560px;
+}
+
+/* --- Grb + "Republika Hrvatska" - mali vodeni žig u gornjem lijevom kutu
+   ekrana. Fiksna pozicija (ne dio kiosk-shell toka), boja vrlo blizu
+   pozadini - suptilno, ne upadljivo. ------------------------------------- */
+
+.kiosk-watermark {
+  position: fixed;
+  top: 1.5rem;
+  left: 1.75rem;
+  z-index: 25;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  pointer-events: none;
+}
+
+.kiosk-watermark-emblem {
+  width: 38px;
+  height: auto;
+  flex-shrink: 0;
+}
+
+.kiosk-watermark-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.kiosk-watermark-line {
+  font-family: "PT Serif", Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.1;
+  color: var(--kiosk-header-text);
+}
+
+/* --- Naziv izbora, dva stanja (dogovoreno s korisnikom) -------------------
+   1) STEP.TOKEN - veliki naslov iznad kartice, ista obitelj fonta kao
+      "Republika Hrvatska", dok birac tek unosi kljuc.
+   2) nakon unosa koda - "skuplja" se u grb u gornjem lijevom kutu, odvojen
+      tankom crtom (isti obrazac kao .admin-header-title-group u admin
+      konzoli), i dalje FIKSIRAN u kutu EKRANA (ne u kiosk-shell toku), jer
+      korisnik zeli da doslovno "ode u kut", ne samo da bude lijevo
+      poravnano unutar centrirane kartice. ------------------------------- */
+
+.kiosk-page-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.kiosk-header-title-big {
+  font-family: "PT Serif", Georgia, serif;
+  font-size: 1.9rem;
+  font-weight: 400;
+  color: var(--kiosk-header-text);
+  margin: 0;
+  text-align: center;
+}
+
+.kiosk-watermark--with-title {
+  pointer-events: auto;
+}
+
+.kiosk-watermark-election {
+  font-family: "PT Serif", Georgia, serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: var(--kiosk-header-text);
+  margin-left: 0.6rem;
+  padding-left: 1.1rem;
+  border-left: 1px solid var(--kiosk-border);
+  white-space: nowrap;
+}
+
+/* --- Kartica za glasanje -------------------------------------------------- */
+
+.kiosk-card {
+  background: var(--kiosk-card-bg);
+  border: 1px solid var(--kiosk-border);
+  border-radius: 0.9rem;
+  box-shadow: 0 14px 34px rgba(43, 42, 37, 0.1);
+  padding: 3rem 2.75rem;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.kiosk-title {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--kiosk-text);
+  letter-spacing: 0.03em;
+}
+
+.kiosk-subtitle {
+  font-size: 1.05rem;
+  color: var(--kiosk-muted);
+}
+
+.kiosk-token-input {
+  font-size: 1.4rem;
+  letter-spacing: 0.1em;
+  padding: 0.9rem;
+  font-family: "Courier New", monospace;
+  border: 2px solid var(--kiosk-border);
+  border-radius: 0.6rem;
+  background: #ffffff;
+  color: var(--kiosk-text);
+}
+
+.kiosk-token-input:focus {
+  border-color: var(--kiosk-primary);
+  box-shadow: 0 0 0 0.2rem rgba(51, 71, 90, 0.15);
+}
+
+.kiosk-btn {
+  padding: 0.9rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 0.6rem;
+  background-color: var(--kiosk-primary);
+  border-color: var(--kiosk-primary);
+}
+
+.kiosk-btn:hover:not(:disabled) {
+  background-color: var(--kiosk-primary-dark);
+  border-color: var(--kiosk-primary-dark);
+}
+
+.kiosk-btn:disabled {
+  opacity: 0.5;
+}
+
+.kiosk-link {
+  font-size: 1rem;
+  color: var(--kiosk-muted);
+  text-decoration: underline;
+}
+
+.kiosk-candidate-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1.1rem 1.4rem;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--kiosk-text);
+  background: #ffffff;
+  border: 1px solid var(--kiosk-border);
+  border-radius: 0.7rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.kiosk-candidate-card:hover {
+  border-color: var(--kiosk-primary);
+}
+
+.kiosk-candidate-card.selected {
+  background: #eaeff2;
+  border-color: var(--kiosk-primary);
+  color: var(--kiosk-primary-dark);
+}
+
+.kiosk-check {
+  font-size: 1.3rem;
+  color: var(--kiosk-primary);
+}
+
+.kiosk-candidate-name {
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--kiosk-primary-dark);
+}
+
+.kiosk-success-icon {
+  font-size: 3.5rem;
+  color: var(--kiosk-success);
+  width: 5.5rem;
+  height: 5.5rem;
+  line-height: 5.5rem;
+  border-radius: 50%;
+  background: var(--kiosk-success-bg);
+  margin: 0 auto;
+}
+
+.kiosk-error-icon {
+  font-size: 2.75rem;
+  font-weight: 700;
+  color: var(--kiosk-error);
+  width: 4.5rem;
+  height: 4.5rem;
+  line-height: 4.5rem;
+  border-radius: 50%;
+  background: var(--kiosk-error-bg);
+  margin: 0 auto;
+}
